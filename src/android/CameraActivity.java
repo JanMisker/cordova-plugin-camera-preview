@@ -542,4 +542,11 @@ public class CameraActivity extends Fragment {
       Math.round((y + 100) * 2000 / height - 1000)
     );
   }
+
+  public Camera.CameraInfo getCurrentCameraInfo() {
+    Camera.CameraInfo result = new Camera.CameraInfo();
+    Camera.getCameraInfo(cameraCurrentlyLocked, result);
+    return result;
+  }
+
 }

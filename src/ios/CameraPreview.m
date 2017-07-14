@@ -712,4 +712,74 @@
       }
     }];
 }
+
+- (void)scanBarcode:(CDVInvokedUrlCommand *)command {
+    // should be called only when camera is active
+    NSLog(@"scanCode");
+    CDVPluginResult *pluginResult;
+    
+    if(self.sessionManager != nil) {
+        static NSDictionary *barcodeFormatMapping = nil;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            barcodeFormatMapping = @{
+                             @"qr": AVMetadataObjectTypeQRCode,
+                             @"code128": AVMetadataObjectTypeCode128Code,
+                             @"code39": AVMetadataObjectTypeCode39Code,
+                             @"upc-e": AVMetadataObjectTypeUPCECode,
+                             @"code39mod43": AVMetadataObjectTypeCode39Mod43Code,
+                             @"ean-13": AVMetadataObjectTypeEAN13Code,
+                             @"ean-8": AVMetadataObjectTypeEAN8Code,
+                             @"code93": AVMetadataObjectTypeCode93Code,
+                             @"pdf417": AVMetadataObjectTypePDF417Code,
+                             @"aztec": AVMetadataObjectTypeAztecCode,
+                             @"interleaved2of5": AVMetadataObjectTypeInterleaved2of5Code,
+                             @"itf14": AVMetadataObjectTypeITF14Code,
+                             @"datamatrix": AVMetadataObjectTypeDataMatrixCode
+                             };
+        });
+        // keep track of the callbackId
+        self.onBarcodeScannedHandlerId = command.callbackId;
+        // convert the command argument array
+        //  @[AVMetadataObjectTypeQRCode, AVMetadataObjectTypeCode128Code];
+        NSDictionary *options = [command argumentAtIndex:0 withDefault:[NSDictionary dictionary]];
+        NSLog(@"opts %@", options);
+        NSMutableArray *formats = [NSMutableArray array];
+        NSArray *optionsFormats = [options objectForKey:@"formats"];
+        if (optionsFormats) {
+            for (NSString *optionFormat in optionsFormats) {
+              if ([optionFormat caseInsensitiveCompare:@"all"] == NSOrderedSame)
+                // add all formats
+                [formats setArray:barcodeFormatMapping.allValues];
+              } else {
+                NSString *format = [barcodeFormatMapping objectForKey:optionFormat.lowercaseString];
+                if (format) {
+                    [formats addObject:format];
+                }
+              }
+            }
+        }
+        NSLog(@"formats %@", formats);
+        // this at some point results in barcodeScanned: being called
+        [self.sessionManager enableBarcodeScanning:formats];
+    }
+    else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Camera not started"];
+    }
+}
+
+- (void)barcodeScanned:(NSString *)barcode {
+    // for now only scan once; to be improved
+    [self.sessionManager disableBarcodeScanning];
+    if (!self.onBarcodeScannedHandlerId) {
+        // should not happend;
+        NSLog(@"barcodeScanned called without onBarcodeScannedHandlerId");
+        return;
+    }
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:barcode];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.onBarcodeScannedHandlerId];
+    self.onBarcodeScannedHandlerId = nil;
+}
+
+
 @end

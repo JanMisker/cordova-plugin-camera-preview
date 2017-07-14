@@ -145,6 +145,14 @@
 
         [self.session addOutput:dataOutput];
       }
+      
+      AVCaptureMetadataOutput *metadataOutput = [[AVCaptureMetadataOutput alloc] init];
+      if ([self.session canAddOutput:metadataOutput]) {
+          self.metadataOutput = metadataOutput;
+          metadataOutput.metadataObjectTypes = nil; // don't start capturing yet
+          [metadataOutput setMetadataObjectsDelegate:self.delegate queue:self.sessionQueue];
+          [self.session addOutput:metadataOutput];
+      }
 
       [self updateOrientation:[self getCurrentOrientation]];
       self.device = videoDevice;
@@ -714,4 +722,10 @@
   return nil;
 }
 
+- (void)enableBarcodeScanning:(NSArray *)objectTypes {
+    self.metadataOutput.metadataObjectTypes = objectTypes;
+}
+- (void)disableBarcodeScanning {
+    self.metadataOutput.metadataObjectTypes = nil;
+}
 @end

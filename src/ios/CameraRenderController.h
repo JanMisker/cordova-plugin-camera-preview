@@ -18,7 +18,11 @@
 - (void) invokeTapToFocus:(CGPoint)point;
 @end;
 
-@interface CameraRenderController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate, OnFocusDelegate> {
+@protocol BarcodeDelegate
+- (void) barcodeScanned:(NSString *)barcode;
+@end;
+
+@interface CameraRenderController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate, OnFocusDelegate, AVCaptureMetadataOutputObjectsDelegate> {
   GLuint _renderBuffer;
   CVOpenGLESTextureCacheRef _videoTextureCache;
   CVOpenGLESTextureRef _lumaTexture;

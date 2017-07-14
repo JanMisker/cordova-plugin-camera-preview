@@ -5,7 +5,7 @@
 #import "CameraSessionManager.h"
 #import "CameraRenderController.h"
 
-@interface CameraPreview : CDVPlugin <TakePictureDelegate, FocusDelegate>
+@interface CameraPreview : CDVPlugin <TakePictureDelegate, FocusDelegate, BarcodeDelegate>
 
 - (void) startCamera:(CDVInvokedUrlCommand*)command;
 - (void) stopCamera:(CDVInvokedUrlCommand*)command;
@@ -36,6 +36,8 @@
 - (void) getWhiteBalanceMode:(CDVInvokedUrlCommand*)command;
 - (void) setWhiteBalanceMode:(CDVInvokedUrlCommand*)command;
 
+- (void)scanBarcode:(CDVInvokedUrlCommand*)command;
+    
 - (void) invokeTakePicture:(CGFloat) width withHeight:(CGFloat) height withQuality:(CGFloat) quality;
 - (void) invokeTakePicture;
 
@@ -44,5 +46,6 @@
 @property (nonatomic) CameraSessionManager *sessionManager;
 @property (nonatomic) CameraRenderController *cameraRenderController;
 @property (nonatomic) NSString *onPictureTakenHandlerId;
+@property (nonatomic) NSString *onBarcodeScannedHandlerId;
 
 @end

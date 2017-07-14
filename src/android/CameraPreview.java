@@ -18,8 +18,17 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Arrays;
+
+//import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.Detector;
+//import com.google.android.gms.vision.Detector.Processor;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.android.gms.vision.Tracker;
+import android.util.SparseArray;
 
 public class CameraPreview extends CordovaPlugin implements CameraActivity.CameraPreviewListener {
 
@@ -53,6 +62,7 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
   private static final String GET_EXPOSURE_COMPENSATION_RANGE_ACTION = "getExposureCompensationRange";
   private static final String GET_WHITE_BALANCE_MODE_ACTION = "getWhiteBalanceMode";
   private static final String SET_WHITE_BALANCE_MODE_ACTION = "setWhiteBalanceMode";
+  private static final String SCAN_BARCODE = "scanBarcode";
 
   private static final int CAM_REQ_CODE = 0;
 
@@ -64,6 +74,7 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
   private CallbackContext takePictureCallbackContext;
   private CallbackContext setFocusCallbackContext;
   private CallbackContext startCameraCallbackContext;
+  private CallbackContext scanBarcodeCallbackContext;
 
   private CallbackContext execCallback;
   private JSONArray execArgs;
@@ -139,6 +150,8 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
       return getWhiteBalanceMode(callbackContext);
     } else if (SET_WHITE_BALANCE_MODE_ACTION.equals(action)) {
       return setWhiteBalanceMode(args.getString(0),callbackContext);
+    } else if (SCAN_BARCODE.equals(action)) {
+      return scanBarcode(args.optJSONObject(0), callbackContext);
     }
     return false;
   }
@@ -850,4 +863,62 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     callbackContext.success();
     return true;
   }
+
+
+  private CameraSource mCameraSource;
+//  private BarcodeProcessor mBarcodeProcessor;
+  private BarcodeDetector mBarcodeDetector;
+
+  private boolean scanBarcode(JSONObject opts, CallbackContext callbackContext) {
+    if (this.hasCamera(callbackContext) == false) {
+      return true;
+    }
+    scanBarcodeCallbackContext = callbackContext;
+
+    if (mBarcodeDetector == null) {
+      mBarcodeDetector = new BarcodeDetector.Builder(cordova.getActivity().getApplicationContext())
+        .setBarcodeFormats(Barcode.ALL_FORMATS)
+        .build();
+      mBarcodeDetector.setProcessor(new BarcodeProcessor());
+    }
+    Log.d(TAG, "BarcodeDetector isOperational? " + mBarcodeDetector.isOperational());
+
+    // figure out current camera direction
+    boolean facingFront = fragment.getCurrentCameraInfo().facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
+    if (mCameraSource == null) {
+      mCameraSource = new CameraSource.Builder(cordova.getActivity().getApplicationContext(), mBarcodeDetector)
+        .setFacing(facingFront ? CameraSource.CAMERA_FACING_FRONT : CameraSource.CAMERA_FACING_BACK)
+        //.setRequestedPreviewSize(320, 240)
+        .build();
+    } else {
+      // check that it is facing the right way
+      boolean cameraSourceFacingFront = mCameraSource.getCameraFacing() == CameraSource.CAMERA_FACING_FRONT;
+      if (cameraSourceFacingFront != facingFront) {
+        // stop it and switch it around
+        mCameraSource.stop();
+        mCameraSource.release();
+        mCameraSource = new CameraSource.Builder(cordova.getActivity().getApplicationContext(), mBarcodeDetector)
+          .setFacing(facingFront ? CameraSource.CAMERA_FACING_FRONT : CameraSource.CAMERA_FACING_BACK)
+          .build();
+      }
+    }
+    // we now have a mCameraSource facing the right direction
+    // ToDo should we check whether it is already running?
+
+    try {
+      // once it is started the BarcodeProcessor will receive results
+      mCameraSource.start(fragment.getCamera());
+      // only one barcode should be detected
+    } catch (IOException e) {
+      Log.d("Setup", "Error starting camerasource");
+      e.printStackTrace();
+    } catch (SecurityException se) {
+      Log.d("Setup", "Security Exception starting camerasource");
+      se.printStackTrace();
+    }
+    return true;
+  }
+
 }
+
+

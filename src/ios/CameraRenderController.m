@@ -241,4 +241,13 @@
   [self.sessionManager updateOrientation:[self.sessionManager getCurrentOrientation:toInterfaceOrientation]];
 }
 
+- (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
+    for (AVMetadataObject *obj in metadataObjects) {
+        if ([obj isKindOfClass:[AVMetadataMachineReadableCodeObject class]]) {
+            NSString *codeString = [(AVMetadataMachineReadableCodeObject *)obj stringValue];
+            [self.delegate barcodeScanned:codeString];
+        }
+    }
+}
+
 @end

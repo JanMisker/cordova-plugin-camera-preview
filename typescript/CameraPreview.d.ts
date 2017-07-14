@@ -25,4 +25,5 @@ interface CameraPreview {
   getSupportedWhiteBalanceModes(onSuccess?:any, onError?:any):any;
   getSupportedWhiteBalanceMode(onSuccess?:any, onError?:any):any;
   setWhiteBalanceMode(whiteBalanceMode?:any, onSuccess?:any, onError?:any):any;
+  scanBarcode(options?:any, onSuccess?:any, onError?:any):any;
 }

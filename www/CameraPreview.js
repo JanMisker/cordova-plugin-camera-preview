@@ -221,4 +221,11 @@ CameraPreview.CAMERA_DIRECTION = {
     FRONT: 'front'
 };
 
+CameraPreview.scanBarcode = function(options, onSuccess, onError) {
+    options = options || {};
+    // array with barcode types we are interested in, for now ignored
+    // options.barcodeTypes = options.barcodeTypes || [];
+    exec(onSuccess, onError, PLUGIN_NAME, "scanBarcode", [options]);
+}
+
 module.exports = CameraPreview;

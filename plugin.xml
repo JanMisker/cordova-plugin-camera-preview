@@ -19,6 +19,10 @@
     <source-file src="src/android/CustomSurfaceView.java" target-dir="src/com/cordovaplugincamerapreview" />
     <source-file src="src/android/Preview.java" target-dir="src/com/cordovaplugincamerapreview" />
     <source-file src="src/android/TapGestureDetector.java" target-dir="src/com/cordovaplugincamerapreview" />
+    <source-file src="src/android/BarcodeProcessor.java" target-dir="src/com/cordovaplugincamerapreview" />
+    <source-file src="src/android/CameraSource.java" target-dir="src/com/cordovaplugincamerapreview" />
+    <source-file src="src/android/CameraSourcePreview.java" target-dir="src/com/cordovaplugincamerapreview" />
+    <source-file src="src/android/GraphicOverlay.java" target-dir="src/com/cordovaplugincamerapreview" />
     <source-file src="src/android/camera_activity.xml" target-dir="res/layout" />
     <source-file src="src/android/camera_theme.xml" target-dir="res/values" />
     <source-file src="src/android/camera_ids.xml" target-dir="res/values" />
@@ -34,11 +38,16 @@
       <uses-feature android:name="android.hardware.camera" android:required="true"/>
       <uses-feature android:name="android.hardware.camera.autofocus" />
       <uses-permission android:name="android.permission.CAMERA" />
+      <uses-permission android:name="android.permission.FLASHLIGHT" />
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
       <activity android:name="com.cordovaplugincamerapreview.CameraActivity" android:screenOrientation="portrait" android:theme="@style/CameraPreviewTheme" />
     </config-file>
+    <!-- <framework src="com.google.android.gms:play-services-vision:9.0.0+" /> -->
+    <framework src="src/android/barcodescanner.gradle" custom="true" type="gradleReference"/>
+    <resource-file src="src/android/barcodescanner-release-2.1.5.aar" target="libs/barcodescanner.aar"/>
+    
   </platform>
 
   <platform name="ios">

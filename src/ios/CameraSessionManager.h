@@ -36,6 +36,9 @@
 - (void) setTorchMode;
 - (AVCaptureVideoOrientation) getCurrentOrientation:(UIInterfaceOrientation)toInterfaceOrientation;
 
+- (void) enableBarcodeScanning:(NSArray *)objectTypes; // ToDo specify which codes
+- (void) disableBarcodeScanning;
+
 @property (atomic) CIFilter *ciFilter;
 @property (nonatomic) NSLock *filterLock;
 @property (nonatomic) AVCaptureSession *session;
@@ -50,5 +53,7 @@
 @property (nonatomic, assign) id delegate;
 @property (nonatomic) NSString *currentWhiteBalanceMode;
 @property (nonatomic) NSDictionary *colorTemperatures;
+
+@property (nonatomic) AVCaptureMetadataOutput *metadataOutput;
 
 @end
