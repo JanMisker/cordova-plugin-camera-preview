@@ -33,7 +33,7 @@ interface CameraPreviewPreviewSizeDimension {
 }
 
 interface CameraPreviewScanBarcodeOptions {
-  format?: string[];
+  formats?: string[];
 }
 
 interface CameraPreview {
