@@ -19,18 +19,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Arrays;
 
 //import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.Detector;
+//import com.google.android.gms.vision.Detector;
 //import com.google.android.gms.vision.Detector.Processor;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.android.gms.vision.Tracker;
-import android.util.SparseArray;
+import com.google.zxing.BarcodeFormat;
+//import com.google.android.gms.vision.barcode.Barcode;
+//import com.google.android.gms.vision.barcode.BarcodeDetector;
+//import com.google.android.gms.vision.Tracker;
+//import android.util.SparseArray;
 
-public class CameraPreview extends CordovaPlugin implements CameraActivity.CameraPreviewListener {
+import com.google.zxing.client.android.encode.EncodeActivity;
+
+public class CameraPreview extends CordovaPlugin implements CameraActivity.CameraPreviewListener, BarcodeProcessor.Listener {
 
   private static final String TAG = "CameraPreview";
 
@@ -876,34 +881,22 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     scanBarcodeCallbackContext = callbackContext;
 
     if (mBarcodeDetector == null) {
-      mBarcodeDetector = new BarcodeDetector.Builder(cordova.getActivity().getApplicationContext())
-        .setBarcodeFormats(Barcode.ALL_FORMATS)
+      Collection<BarcodeFormat> formats = EnumSet.allOf(BarcodeFormat.class);
+      BarcodeProcessor barcodeProcessor = new BarcodeProcessor();
+      barcodeProcessor.setListener(this);
+
+      mBarcodeDetector = new BarcodeDetector.Builder()
+        .setBarcodeFormats(formats)
         .build();
-      mBarcodeDetector.setProcessor(new BarcodeProcessor());
+      mBarcodeDetector.setProcessor(barcodeProcessor);
     }
-    Log.d(TAG, "BarcodeDetector isOperational? " + mBarcodeDetector.isOperational());
 
     // figure out current camera direction
-    boolean facingFront = fragment.getCurrentCameraInfo().facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
     if (mCameraSource == null) {
       mCameraSource = new CameraSource.Builder(cordova.getActivity().getApplicationContext(), mBarcodeDetector)
-        .setFacing(facingFront ? CameraSource.CAMERA_FACING_FRONT : CameraSource.CAMERA_FACING_BACK)
         //.setRequestedPreviewSize(320, 240)
         .build();
-    } else {
-      // check that it is facing the right way
-      boolean cameraSourceFacingFront = mCameraSource.getCameraFacing() == CameraSource.CAMERA_FACING_FRONT;
-      if (cameraSourceFacingFront != facingFront) {
-        // stop it and switch it around
-        mCameraSource.stop();
-        mCameraSource.release();
-        mCameraSource = new CameraSource.Builder(cordova.getActivity().getApplicationContext(), mBarcodeDetector)
-          .setFacing(facingFront ? CameraSource.CAMERA_FACING_FRONT : CameraSource.CAMERA_FACING_BACK)
-          .build();
-      }
     }
-    // we now have a mCameraSource facing the right direction
-    // ToDo should we check whether it is already running?
 
     try {
       // once it is started the BarcodeProcessor will receive results
@@ -919,6 +912,18 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     return true;
   }
 
+  public void onBarcodeDetected(Barcode barcode) {
+    Log.d(TAG, "returning barcode");
+
+    if (scanBarcodeCallbackContext != null) {
+
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, barcode.getText());
+      //pluginResult.setKeepCallback(false);
+      scanBarcodeCallbackContext.sendPluginResult(pluginResult);
+      scanBarcodeCallbackContext = null;
+    }
+
+  }
 }
 
 

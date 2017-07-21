@@ -4,10 +4,10 @@ package com.cordovaplugincamerapreview;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.barcode.Barcode;
+import com.google.zxing.Result;
 
 class BarcodeProcessor implements Detector.Processor<Barcode> {
+    Listener listener;
 
     public BarcodeProcessor() {
         Log.d("Detect", "created");
@@ -15,8 +15,12 @@ class BarcodeProcessor implements Detector.Processor<Barcode> {
 
     @Override
     public void release() {
-
+      listener = null;
     }
+
+  public void setListener(Listener listener) {
+    this.listener = listener;
+  }
 
     @Override
     public void receiveDetections(Detector.Detections<Barcode> detections) {
@@ -24,7 +28,13 @@ class BarcodeProcessor implements Detector.Processor<Barcode> {
         int sizeCheck = detections.getDetectedItems().size();
         for (int i = 0; i < sizeCheck; i++) {
             Barcode barcode = codes.valueAt(i);
-            Log.d("Detect", barcode.displayValue);
+            if (this.listener != null) {
+              this.listener.onBarcodeDetected(barcode);
+            }
         }
+    }
+
+    public interface Listener {
+      void onBarcodeDetected(Barcode barcode);
     }
 }

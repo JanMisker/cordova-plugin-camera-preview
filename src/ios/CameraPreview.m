@@ -743,23 +743,23 @@
         // convert the command argument array
         //  @[AVMetadataObjectTypeQRCode, AVMetadataObjectTypeCode128Code];
         NSDictionary *options = [command argumentAtIndex:0 withDefault:[NSDictionary dictionary]];
-        NSLog(@"opts %@", options);
+        NSLog(@"scanCode opts %@", options);
         NSMutableArray *formats = [NSMutableArray array];
         NSArray *optionsFormats = [options objectForKey:@"formats"];
         if (optionsFormats) {
             for (NSString *optionFormat in optionsFormats) {
-              if ([optionFormat caseInsensitiveCompare:@"all"] == NSOrderedSame)
+                if ([optionFormat caseInsensitiveCompare:@"all"] == NSOrderedSame) {
                 // add all formats
-                [formats setArray:barcodeFormatMapping.allValues];
-              } else {
-                NSString *format = [barcodeFormatMapping objectForKey:optionFormat.lowercaseString];
-                if (format) {
-                    [formats addObject:format];
+                    [formats setArray:barcodeFormatMapping.allValues];
+                    break;
+                } else {
+                    NSString *format = [barcodeFormatMapping objectForKey:optionFormat.lowercaseString];
+                    if (format) {
+                        [formats addObject:format];
+                    }
                 }
-              }
             }
         }
-        NSLog(@"formats %@", formats);
         // this at some point results in barcodeScanned: being called
         [self.sessionManager enableBarcodeScanning:formats];
     }

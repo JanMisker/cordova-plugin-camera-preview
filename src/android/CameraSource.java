@@ -35,9 +35,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
-import com.google.android.gms.common.images.Size;
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.Frame;
+//import com.google.android.gms.common.images.Size;
+//import com.google.android.gms.vision.Detector;
+//import com.google.android.gms.vision.Frame;
 
 import java.io.IOException;
 import java.lang.Thread.State;
@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * Manages the camera in conjunction with an underlying
- * {@link com.google.android.gms.vision.Detector}.  This receives preview frames from the camera at
+ * Detector.  This receives preview frames from the camera at
  * a specified rate, sending those frames to the detector as fast as it is able to process those
  * frames.
  * <p/>

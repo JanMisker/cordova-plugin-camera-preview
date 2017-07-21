@@ -723,6 +723,11 @@
 }
 
 - (void)enableBarcodeScanning:(NSArray *)objectTypes {
+    NSError *error = nil;
+    if (self.device.autoFocusRangeRestrictionSupported && [self.device lockForConfiguration:&error]) {
+        self.device.autoFocusRangeRestriction = AVCaptureAutoFocusRangeRestrictionNear;
+        [self.device unlockForConfiguration];
+    }
     self.metadataOutput.metadataObjectTypes = objectTypes;
 }
 - (void)disableBarcodeScanning {
