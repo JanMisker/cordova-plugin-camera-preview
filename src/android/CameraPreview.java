@@ -900,6 +900,7 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     scanBarcodeCallbackContext = callbackContext;
 
     if (mBarcodeDetector == null) {
+      // ToDo: honor the formats in opts
       Collection<BarcodeFormat> formats = EnumSet.allOf(BarcodeFormat.class);
       BarcodeProcessor barcodeProcessor = new BarcodeProcessor();
       barcodeProcessor.setListener(this);
@@ -910,7 +911,6 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
       mBarcodeDetector.setProcessor(barcodeProcessor);
     }
 
-    // figure out current camera direction
     if (mCameraSource == null) {
       mCameraSource = new CameraSource.Builder(cordova.getActivity().getApplicationContext(), mBarcodeDetector)
         //.setRequestedPreviewSize(320, 240)

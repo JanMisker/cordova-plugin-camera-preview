@@ -30,19 +30,20 @@ import android.util.SparseArray;
  * THE SOFTWARE.
  */
 public abstract class Detector<T> {
-    Detector.Processor<T> mProcessor;
+    private Detector.Processor<T> mProcessor;
+    private Object lock = new Object();
 
     abstract SparseArray<T> detect(Frame frame);
 
     public void receiveFrame(Frame frame) {
         Object var2 = lock;
         synchronized(lock) {
-            if(processor == null) {
+            if(mProcessor == null) {
                 throw new IllegalStateException("Detector processor must first be set with setProcessor in order to receive detection results.");
             } else {
                 SparseArray detectedItems = detect(frame);
                 Detector.Detections detections = new Detector.Detections(detectedItems);
-                processor.receiveDetections(detections);
+                mProcessor.receiveDetections(detections);
             }
         }
     }
